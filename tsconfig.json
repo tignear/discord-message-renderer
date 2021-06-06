@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "jsx": "react-jsx",
+    "jsxImportSource": "../",
+    "strict": true,
+    "outDir": "./build",
+    "moduleResolution": "node",
+    "declaration": true,
+    "rootDir": "src",
+  },
+  "include": [
+    "src/**/*"
+  ],
+}     

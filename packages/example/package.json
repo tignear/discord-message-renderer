@@ -1,0 +1,16 @@
+{
+  "name": "example",
+  "license": "MIT",
+  "version": "1.0.0",
+  "devDependencies": {
+    "lerna": "^3.22.1"
+  },
+  "dependencies": {
+    "discord-message-jsx": "^1.0.0",
+    "discord-message-jsx-discordjs": "^1.0.0",
+    "discord.js": "discordjs/discord.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}
