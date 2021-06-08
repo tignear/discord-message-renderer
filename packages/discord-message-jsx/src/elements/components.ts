@@ -43,14 +43,14 @@ export interface ButtonPropsLnk {
 }
 export type ButtonProps = ButtonPropsEvt | ButtonPropsLnk;
 export type EmojiElement = UnicodeEmojiElement | CustomEmojiElement | Element;
-export interface UnicodeEmojiElement extends Phantomic<RootElement, "unicode_emoji"> {
+export interface UnicodeEmojiElement extends Phantomic<Element, "unicode_emoji"> {
 
 }
 export type UnicodeEmojiChild = string;
 export interface UnicodeEmojiProps {
   children: string
 }
-export interface CustomEmojiElement extends Phantomic<RootElement, "custom_emoji"> {
+export interface CustomEmojiElement extends Phantomic<Element, "custom_emoji"> {
 
 }
 export interface CustomEmojiProps {
@@ -60,8 +60,9 @@ export interface CustomEmojiProps {
 export const components_elements = {
   components(props: ComponentsProps): ComponentsElement {
     return inject("components", {
-      render(ctx) {
-        return [["components", asArray(props.children).map(e => ctx.render(e, { context: "root" }))]];
+      render(ctx: Context<"child" | "root">): any {
+        const v = asArray(props.children).map(e => ctx.render(e, { context: "root" }));
+        return ctx.context === "root" ? v : [["components", v]];
       },
     });
   },
@@ -79,18 +80,17 @@ export const components_elements = {
 
     const style = typeof props.style === "string" ? BUTTON_STYLES[props.style] : props.style;
     function renderChildren(ctx: Context<"root">) {
-      return Object.fromEntries(asArray(props.children).map(e => {
+      return Object.fromEntries(asArray(props.children).flatMap(e => {
         if (typeof e === "string") {
-          return ["label", e];
+          return [["label", e]];
         } else {
-          return ["emoji", ctx.render(e, { context: "root" })];
+          return ctx.render(e, { context: "child" });
         }
       }));
     }
     if (props.style === 5 || props.style === "LINK") {
       return inject("button", {
         render(ctx) {
-
           return {
             type: 2,
             style: style,
@@ -118,20 +118,23 @@ export const components_elements = {
   },
   unicode_emoji(props: UnicodeEmojiProps): UnicodeEmojiElement {
     return inject("unicode_emoji", {
-      render() {
-        return {
+      render(ctx: Context<"child" | "root">): any {
+        const v = {
           name: props.children
         };
+        return ctx.context === "root" ? v : [["emoji", v]];
       }
     });
   },
   custom_emoji(props: CustomEmojiProps): CustomEmojiElement {
     return inject("custom_emoji", {
-      render() {
-        return {
+      render(ctx: Context<"child" | "root">): any {
+        const v = {
           id: props.id,
           animated: props.animated
         };
+
+        return ctx.context === "root" ? v : [["emoji", v]];
       }
     });
   },

@@ -1,8 +1,7 @@
 import { Element } from "discord-message-jsx";
-import { MessageActionRow, MessageButton, MessageEmbed, MessageOptions, WebhookMessageOptions, Structures, MessageAdditions } from "discord.js";
+import { MessageActionRow, MessageButton, MessageEmbed, MessageOptions, WebhookMessageOptions } from "discord.js";
 
-
-export function render(element: Element): [string, Pick<MessageOptions & WebhookMessageOptions, "embed" | "embeds" | "components">?]&MessageEmbed | MessageEmbed[] {
+export function render(element: Element): Pick<MessageOptions & WebhookMessageOptions, "embed" | "embeds" | "components" | "content"> | (MessageEmbed & MessageEmbed[]) {
   const render_result = element.render({
     render(element: Element, ctx: { context: "root" | "child" }) {
       switch (element.name) {
@@ -25,12 +24,5 @@ export function render(element: Element): [string, Pick<MessageOptions & Webhook
     },
     context: "root"
   } as any) as any;
-  switch (element.name) {
-    case "message":
-      return [render_result.content ?? "", render_result.options ?? {}];
-    default:
-      return render_result;
-  }
-
+  return render_result;
 }
-

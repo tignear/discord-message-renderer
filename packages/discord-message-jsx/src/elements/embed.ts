@@ -3,10 +3,10 @@ import { asArray } from "./message";
 import { CC, Context, Element, inject, Phantomic, RootElement } from "./util";
 
 // embeds
-export interface EmbedsElement extends CC<"embeds"> {
+export interface EmbedsElement extends Phantomic<Element, "embeds"> {
 
 }
-export type EmbedsChild = EmbedElement;
+export type EmbedsChild = EmbedElement | Element;
 export interface EmbedsProps {
   children: EmbedsChild | EmbedsChild[];
 }
@@ -29,7 +29,7 @@ export interface TitleProps {
   url?: string;
 }
 //embed.fields
-export interface FieldsElement extends CC<"fields"> {
+export interface FieldsElement extends Phantomic<Element, "fields"> {
 
 }
 export type FieldsChild = FieldElement | Element;
@@ -47,7 +47,7 @@ export interface FieldProps {
   inline?: boolean;
 }
 //embed.footer
-export interface FooterElement extends CC<"footer"> {
+export interface FooterElement extends Phantomic<Element, "footer"> {
 
 }
 export type FooterChild = string;
@@ -56,7 +56,7 @@ export interface FooterProps {
   icon_url?: string;
 }
 // embed.author
-export interface AuthorElement extends CC<"author"> {
+export interface AuthorElement extends Phantomic<Element, "author"> {
 
 }
 export type AuthorChild = string;
@@ -66,14 +66,14 @@ export interface AuthorProps {
   icon_url?: string;
 }
 // embed.thumbnail
-export interface ThumbnailElement extends CC<"thumbnail"> {
+export interface ThumbnailElement extends Phantomic<Element, "thumbnail"> {
 
 }
 export interface ThumbnailProps {
   url?: string;
 }
 // embed.image
-export interface ImageElement extends CC<"image"> {
+export interface ImageElement extends Phantomic<Element, "image"> {
 
 }
 export interface ImageProps {
@@ -111,8 +111,9 @@ function resolveColor(color: ColorResolvable | undefined): number {
 export const embed_elements = {
   embeds(props: EmbedsProps, key?: string): EmbedsElement {
     return inject("embeds", {
-      render(ctx): [["embeds", unknown]] {
-        return [["embeds", asArray(props.children).map(e => ctx.render(e, { context: "root" }))]];
+      render(ctx: Context<"child" | "root">): any {
+        const v = asArray(props.children).map(e => ctx.render(e, { context: "root" }));
+        return ctx.context === "root" ? v : [["embeds", v]];
       }
     });
   },
@@ -129,7 +130,7 @@ export const embed_elements = {
           color: resolveColor(props.color),
           timestamp: typeof props.timestamp === "number" ? props.timestamp : props.timestamp?.getDate() ?? undefined
         };
-        switch (ctx.context ?? "root") {
+        switch (ctx.context) {
           case "child":
             return [["embed", embed]];
           case "root":
@@ -150,8 +151,9 @@ export const embed_elements = {
   },
   fields(props: FieldsProps): FieldsElement {
     return inject("fields", {
-      render(ctx) {
-        return [["fields", asArray(props.children).map(e => ctx.render(e, { context: "root" }))]];
+      render(ctx: Context<"child" | "root">): any {
+        const v = asArray(props.children).map(e => ctx.render(e, { context: "root" }));
+        return ctx.context === "root" ? v : [["fields", v]];
       }
     });
   },
@@ -168,40 +170,44 @@ export const embed_elements = {
   },
   footer(props: FooterProps): FooterElement {
     return inject("footer", {
-      render() {
-        return [["footer", {
+      render(ctx: Context<"root" | "child">): any {
+        const v = {
           text: props.children,
           icon_url: props.icon_url
-        }]];
+        };
+        return ctx.context === "root" ? v : [["footer", v]];
       }
     });
   },
   author(props: AuthorProps): AuthorElement {
     return inject("author", {
-      render() {
-        return [["author", {
+      render(ctx: Context<"root" | "child">): any {
+        const v = {
           name: props.children,
           icon_url: props.icon_url,
           url: props.url
-        }]];
+        };
+        return ctx.context === "root" ? v : [["author", v]];
       }
     });
   },
   thumbnail(props: ThumbnailProps): ThumbnailElement {
     return inject("thumbnail", {
-      render() {
-        return [["thumbnail", {
+      render(ctx: Context<"root" | "child">): any {
+        const v = {
           url: props.url
-        }]];
+        };
+        return ctx.context === "root" ? v : [["thumbnail", v]];
       }
     });
   },
   image(props: ImageProps): ImageElement {
     return inject("image", {
-      render() {
-        return [["image", {
+      render(ctx: Context<"root" | "child">): any {
+        const v = {
           url: props.url
-        }]];
+        };
+        return ctx.context === "root" ? v : [["image", v]];
       }
     });
   },
